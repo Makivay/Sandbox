@@ -1,16 +1,13 @@
 package ru.Makivay.sandbox;
 
-import ru.Makivay.sandbox.tests.PdfTests;
-import ru.Makivay.sandbox.utils.SomeUselesStuff;
-import sun.nio.ch.ThreadPool;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import ru.Makivay.sandbox.utils.FileLoader;
+import ru.Makivay.sandbox.utils.PdfToolbox;
 
 import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Application {
 
@@ -20,8 +17,17 @@ public class Application {
 
     public static void main(String args[]) throws IOException {
 
-        SomeUselesStuff.cpuHeat();
 
+        try (PDDocument document = PDDocument.load(new FileLoader().getFile("pdf/1095new/1095C_andy_save_fields2.pdf"))) {
+            PdfToolbox.getFieldNamesList(document).forEach(System.out::println);
+//            System.out.println(document.getDocumentCatalog().getAcroForm().getXFA() != null);
+//            document.getDocumentCatalog().getAcroForm().exportFDF().save("out.fdf");
+//            try(FDFDocument fdfDocument = FDFDocument.loadXFDF(new FileLoader().getFile("pdf/1095new/1095CHelvetica.fdf"))){
+//                document.getDocumentCatalog().getAcroForm().importFDF(fdfDocument);
+//            }
+//            document.save("out.pdf");
+
+        }
     }
 
     private static void logMem() {
