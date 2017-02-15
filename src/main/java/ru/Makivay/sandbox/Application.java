@@ -2,20 +2,23 @@ package ru.Makivay.sandbox;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import ru.Makivay.sandbox.searcher.*;
+import ru.Makivay.sandbox.searcher.LcsPath;
+import ru.Makivay.sandbox.searcher.LcsPathHolder;
+import ru.Makivay.sandbox.searcher.Rule;
+import ru.Makivay.sandbox.searcher.Searcher;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
-import java.util.OptionalInt;
-import java.util.stream.Collectors;
+import java.util.PriorityQueue;
 
 public class Application {
 
     private final static Gson gson = new GsonBuilder().serializeNulls().setPrettyPrinting().create();
 
-    private final static String TEXT = "Lorem Ipsum is simply dummy text of the printing and typesetting industry.Lorem Ipsum is simply dummy text of the printing and typesetting industry.Lorem Ipsum is simply dummy text of the printing and typesetting industry.";
-    private final static String RULE = "\"simply\" Any() \"printing\"";
+        private final static String TEXT = "one two three four five six seven eight nine";
+    private final static String RULE = "\"one\" Any() \"three\" Any() \"five\"";
+//    private final static String TEXT = "Lorem Ipsum is simply dummy text of the printing and typesetting industry.Lorem Ipsum is simply dummy text of the printing and typesetting industry.Lorem Ipsum is simply dummy text of the printing and typesetting industry.";
+//    private final static String RULE = "\"simply\" Any() \"printing\"";
 //    private final static String TEXT = "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
 //    private final static String RULE = "\"111111111111\" \"111111111111\" \"111111111111\"";
 
@@ -25,26 +28,15 @@ public class Application {
 
         final List<LcsPath> allPaths = holder.getAllPaths();
 
+        final PriorityQueue<LcsPath> lcsPathPriorityQueue = new PriorityQueue<>((o1, o2) -> {
+            final int probComparison = Double.compare(o2.getPathProb(), o1.getPathProb());
+            final int lenghtComparison = Integer.compare(o2.getPathlenght(), o1.getPathlenght());
+            return lenghtComparison == 0 ? probComparison : lenghtComparison;
+        });
 
-        final OptionalInt maxPathLenght = allPaths.stream().mapToInt(LcsPath::getPathlenght).max();
-        if(maxPathLenght.isPresent()) {
-            final double bestProp = allPaths.stream().filter(lcsPath -> lcsPath.getPathlenght() == maxPathLenght.getAsInt()).mapToDouble(LcsPath::getPathProb).max().orElse(0.0);
-            if(bestProp != 0.0) {
-                final List<LcsPath> bestPath = allPaths.stream().filter(lcsPath -> lcsPath.getPathProb() == bestProp && lcsPath.getPathlenght() == maxPathLenght.getAsInt()).collect(Collectors.toList());
-                System.out.println("Best path: ");
-                System.out.println(gson.toJson(bestPath));
-            }
-        }
-//        System.out.println(gson.toJson(allPaths);
+        lcsPathPriorityQueue.addAll(allPaths);
 
-//        final Rule rule = Rule.parse(RULE);
-//        final LcsPathHolder holder = new LcsPathHolder();
-//        for (int i = 0; i < 2; i++) {
-//            for (Expression expression : rule.getExpressions()) {
-//                holder.put(i, expression, new LcsPath("new", 1.0));
-//            }
-//        }
-//
-//        System.out.println(gson.toJson(holder));
+        System.out.println("Best path: ");
+        System.out.println(gson.toJson(lcsPathPriorityQueue.peek()));
     }
 }
