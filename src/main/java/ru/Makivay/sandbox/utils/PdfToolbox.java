@@ -1,6 +1,7 @@
 package ru.Makivay.sandbox.utils;
 
 import com.google.common.collect.Lists;
+import com.google.gson.Gson;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.io.IOUtils;
@@ -8,6 +9,9 @@ import org.apache.pdfbox.multipdf.Overlay;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.pdmodel.font.PDMMType1Font;
 import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationWidget;
@@ -18,6 +22,7 @@ import org.apache.pdfbox.pdmodel.interactive.form.PDNonTerminalField;
 import org.apache.pdfbox.util.Matrix;
 
 import javax.annotation.Nonnull;
+import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -53,6 +58,20 @@ public class PdfToolbox {
         }
     }
 
+    public static void stampPDF(final @Nonnull PDDocument document, final @Nonnull PDDocument stamp, final float x, final float y,final float xs, final float ys) throws IOException {
+        for (PDPage page : document.getPages()) {
+            final PDFormXObject xobject = importAsXObject(stamp, stamp.getPages().get(0));
+            try (final PDPageContentStream content = new PDPageContentStream(document, page, PDPageContentStream.AppendMode.APPEND, false, false)) {
+                content.saveGraphicsState();
+                PDRectangle pdRectangle = xobject.getBBox();
+                content.transform(Matrix.getTranslateInstance(x, y));
+                content.transform(Matrix.getScaleInstance(xs/pdRectangle.getWidth(), ys/pdRectangle.getHeight()));
+                content.drawForm(xobject);
+                content.restoreGraphicsState();
+            }
+        }
+    }
+
     public static void stampPDF(final @Nonnull PDDocument document, final @Nonnull PDDocument stamp, final float x, final float y) throws IOException {
         for (PDPage page : document.getPages()) {
             final PDFormXObject xobject = importAsXObject(stamp, stamp.getPages().get(0));
@@ -64,6 +83,23 @@ public class PdfToolbox {
             }
         }
     }
+
+    //    getHeight: 234.0
+    //    getWidth: 593.0
+
+        public static void stampPDF(final @Nonnull PDDocument document, final String stamp, PDFont font, float fontSize, final float x, final float y) throws IOException {
+            for (PDPage page : document.getPages()) {
+                try (final PDPageContentStream content = new PDPageContentStream(document, page, PDPageContentStream.AppendMode.APPEND, false, false)) {
+                    content.saveGraphicsState();
+                    content.transform(Matrix.getTranslateInstance(x, y));
+                    content.beginText();
+                    content.setFont(font, fontSize);
+                    content.showText(stamp);
+                    content.endText();
+                    content.restoreGraphicsState();
+                }
+            }
+        }
 
     private static PDFormXObject importAsXObject(final @Nonnull PDDocument target, final @Nonnull PDPage page) throws IOException {
         try (final InputStream is = page.getContents()) {

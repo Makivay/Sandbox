@@ -87,7 +87,7 @@ public class PdfTests {
         try (InputStream inputStream = new FileInputStream(temFile)) {
             try (FileOutputStream fileOutputStream = new FileOutputStream(resultFileName)) {
                 org.apache.pdfbox.io.IOUtils.copy(inputStream, fileOutputStream);
-                log("file size: " + new File(resultFileName).length());
+                log("file lenght: " + new File(resultFileName).length());
                 Files.deleteIfExists(temFile.toPath());
             }
         } catch (Exception e) {
