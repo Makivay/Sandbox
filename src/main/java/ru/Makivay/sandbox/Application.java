@@ -2,41 +2,50 @@ package ru.Makivay.sandbox;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import ru.Makivay.sandbox.searcher.LcsPath;
-import ru.Makivay.sandbox.searcher.LcsPathHolder;
-import ru.Makivay.sandbox.searcher.Rule;
-import ru.Makivay.sandbox.searcher.Searcher;
 
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.PriorityQueue;
+import java.util.Random;
 
 public class Application {
 
     private final static Gson gson = new GsonBuilder().serializeNulls().setPrettyPrinting().create();
+    private final static Random random = new Random(System.currentTimeMillis());
 
-        private final static String TEXT = "one two three four five six seven eight nine";
-    private final static String RULE = "\"one\" Any() \"three\" Any() \"five\"";
-//    private final static String TEXT = "Lorem Ipsum is simply dummy text of the printing and typesetting industry.Lorem Ipsum is simply dummy text of the printing and typesetting industry.Lorem Ipsum is simply dummy text of the printing and typesetting industry.";
-//    private final static String RULE = "\"simply\" Any() \"printing\"";
-//    private final static String TEXT = "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
-//    private final static String RULE = "\"111111111111\" \"111111111111\" \"111111111111\"";
+    public static void main(String args[]) {
 
-    public static void main(String args[]) throws IOException {
-        final Rule rule = Rule.parse(RULE);
-        final LcsPathHolder holder = Searcher.process(TEXT, rule);
+        final List<A> aList = new ArrayList<>();
 
-        final List<LcsPath> allPaths = holder.getAllPaths();
+        aList.add(new B("a", "b"));
+        aList.add(new C("a", "c"));
 
-        final PriorityQueue<LcsPath> lcsPathPriorityQueue = new PriorityQueue<>((o1, o2) -> {
-            final int probComparison = Double.compare(o2.getPathProb(), o1.getPathProb());
-            final int lenghtComparison = Integer.compare(o2.getPathlenght(), o1.getPathlenght());
-            return lenghtComparison == 0 ? probComparison : lenghtComparison;
-        });
-
-        lcsPathPriorityQueue.addAll(allPaths);
-
-        System.out.println("Best path: ");
-        System.out.println(gson.toJson(lcsPathPriorityQueue.peek()));
+        System.out.println(gson.toJson(aList));
     }
+    
+    private static abstract class A {
+        final String a;
+
+        public A(String a) {
+            this.a = a;
+        }
+    }
+
+    private static final class B extends A {
+        final String b;
+
+        private B(String a, String b) {
+            super(a);
+            this.b = b;
+        }
+    }
+    
+    private static final class C extends A {
+        final String c;
+
+        private C(String a, String c) {
+            super(a);
+            this.c = c;
+        }
+    }
+
 }
