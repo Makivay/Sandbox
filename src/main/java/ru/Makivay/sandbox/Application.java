@@ -1,11 +1,15 @@
 package ru.Makivay.sandbox;
 
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multiset;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import javax.annotation.Nonnull;
+import java.util.*;
+import java.util.stream.IntStream;
+import java.util.stream.StreamSupport;
 
 public class Application {
 
@@ -14,38 +18,33 @@ public class Application {
 
     public static void main(String args[]) {
 
-        final List<A> aList = new ArrayList<>();
+        final List<double[]> weights = new ArrayList<>();
 
-        aList.add(new B("a", "b"));
-        aList.add(new C("a", "c"));
+        weights.add(new double[]{0.25d, 0.25d, 0.25d, 0.25d});
+        weights.add(new double[]{0.25d, 0.25d, 0.5d, 0.0d});
 
-        System.out.println(gson.toJson(aList));
+        weights.forEach(doubles ->System.out.println(calcWeight(doubles)));
+
     }
-    
-    private static abstract class A {
-        final String a;
 
-        public A(String a) {
-            this.a = a;
+    final
+
+    private static double calcWeight(@Nonnull double weights[]){
+        double w = weights[0];
+        int count = 1;
+        for (int i = 1; i < weights.length; i++) {
+            if(weights[i] > 0.0d){
+                w *= weights[i];
+                count++;
+            }
         }
+        final double penalty = (double) count/weights.length;
+        return Math.pow(w, 1.0/count) * penalty;
     }
 
-    private static final class B extends A {
-        final String b;
-
-        private B(String a, String b) {
-            super(a);
-            this.b = b;
-        }
+    private static double fn(@Nonnull double weights[]){
+//        final OptionalDouble multiply = Arrays.stream(weights).map(operand -> Math.pow(Math.E, operand)).reduce((a, b) -> a * b);
+            final OptionalDouble multiply = Arrays.stream(weights).average();
+        return multiply.isPresent() ? multiply.getAsDouble() * Math.log(weights.length) : 0.0d;
     }
-    
-    private static final class C extends A {
-        final String c;
-
-        private C(String a, String c) {
-            super(a);
-            this.c = c;
-        }
-    }
-
 }
